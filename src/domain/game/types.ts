@@ -1,3 +1,5 @@
+export type GamePhase = "setup" | "reveal" | "clue-round" | "voting" | "result";
+
 export interface Player {
   id: string;
   name: string;
@@ -19,7 +21,7 @@ export interface WordListCategory {
 
 export interface GameSession {
   id: string;
-  phase: "setup" | "reveal" | "clue-round" | "voting" | "result";
+  phase: GamePhase;
   players: Player[];
   impostorIds: string[];
   secretWord: string;

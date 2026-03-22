@@ -1,5 +1,18 @@
 import type { GameResult, GameSession, Player } from "./types";
 
+function shufflePlayers(players: Player[]): Player[] {
+  const shuffledPlayers = [...players];
+
+  for (let index = shuffledPlayers.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    const currentPlayer = shuffledPlayers[index];
+    shuffledPlayers[index] = shuffledPlayers[randomIndex];
+    shuffledPlayers[randomIndex] = currentPlayer;
+  }
+
+  return shuffledPlayers;
+}
+
 export function pickSecretWord(words: string[]): string {
   if (words.length === 0) {
     throw new Error("Cannot pick a secret word from an empty list");
@@ -13,7 +26,9 @@ export function assignImpostors(players: Player[], impostorCount: number): strin
     throw new Error("Invalid impostor count");
   }
 
-  return players.slice(0, impostorCount).map((player) => player.id);
+  return shufflePlayers(players)
+    .slice(0, impostorCount)
+    .map((player) => player.id);
 }
 
 export function resolveWinner(session: GameSession, votedPlayerId: string): GameResult {

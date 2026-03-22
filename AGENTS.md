@@ -44,6 +44,10 @@
 
 - **Branches por Fase**: Cada nueva funcionalidad o fase debe ejecutarse en su propia rama de Git.
 - **Commits Atómicos**: Se debe realizar un commit descriptivo por cada tarea individual completada.
+- **Convención de Commits y PRs**: Los títulos de los commits y de los pull requests deben escribirse en inglés, y la descripción debe escribirse en español.
+- **Push Obligatorio**: Después de cada commit relevante, se debe hacer `push` para sincronizar los cambios con GitHub.
+- **Repositorio Remoto**: El repositorio remoto principal es `https://github.com/ezefernandezyf/impostor-game`.
+- **README Actualizado**: El `README.md` debe mantenerse actualizado y explicar el proyecto de forma convencional, clara y orientada a onboarding.
 - **Separación de Carpetas**:
   - `src/components/`: UI pura (dumb components).
   - `src/features/`: Lógica de negocio y contenedores (smart components).

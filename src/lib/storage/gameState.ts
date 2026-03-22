@@ -10,7 +10,14 @@ export function loadGameState(adapter: StorageAdapter): GameSession | null {
     return null;
   }
 
-  const parsed = JSON.parse(raw) as unknown;
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(raw) as unknown;
+  } catch {
+    return null;
+  }
+
   const result = gameSessionSchema.safeParse(parsed);
 
   return result.success ? result.data : null;
