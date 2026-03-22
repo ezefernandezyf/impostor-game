@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-import { SetupScreen } from "../features/setup/SetupScreen";
+import { GameShell } from "./GameShell";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <SetupScreen />,
+    element: <GameShell />,
   },
 ]);

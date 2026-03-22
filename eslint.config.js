@@ -8,14 +8,9 @@ export default tseslint.config(
     ignores: ["dist", "coverage"],
   },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommended,
   {
     files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.app.json", "./tsconfig.node.json"],
-      },
-    },
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,

@@ -1,6 +1,6 @@
 import type { WordListCategory } from "./types";
 
-export const presetCategories: WordListCategory[] = [
+export const presetCategories: ReadonlyArray<WordListCategory> = Object.freeze([
   {
     id: "footballers",
     name: "Futbolistas",
@@ -13,4 +13,4 @@ export const presetCategories: WordListCategory[] = [
     words: ["tigre", "elefante", "delfín", "panda"],
     preset: true,
   },
-];
+]);

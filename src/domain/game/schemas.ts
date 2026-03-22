@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+function hasUniqueTrimmedNames(names: string[]): boolean {
+  const normalizedNames = names.map((name) => name.trim().toLowerCase());
+  return new Set(normalizedNames).size === normalizedNames.length;
+}
+
 export const playerSchema = z.object({
   id: z.string().min(1),
   name: z.string().trim().min(1),
@@ -22,9 +27,25 @@ export const gameSettingsSchema = z.object({
 export const gameSessionSchema = z.object({
   id: z.string().min(1),
   phase: z.enum(["setup", "reveal", "clue-round", "voting", "result"]),
-  players: z.array(playerSchema).min(2),
+  players: z.array(playerSchema).min(2).max(20),
   impostorIds: z.array(z.string().min(1)).min(1),
   secretWord: z.string().min(1),
   settings: gameSettingsSchema,
   activePlayerIndex: z.number().int().min(0),
+}).superRefine((session, context) => {
+  if (!hasUniqueTrimmedNames(session.players.map((player) => player.name))) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Player names must be unique after trimming.",
+      path: ["players"],
+    });
+  }
+
+  if (session.settings.impostorCount >= session.players.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Impostor count must be less than player count.",
+      path: ["settings", "impostorCount"],
+    });
+  }
 });
