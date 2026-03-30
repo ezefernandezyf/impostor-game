@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -12,6 +12,11 @@ export interface VotingScreenProps {
 
 export function VotingScreen({ players, onSubmitVote }: VotingScreenProps): ReactElement {
   const [targetId, setTargetId] = useState(players[0]?.id ?? "");
+
+  useEffect(() => {
+    const nextDefault = players[0]?.id ?? "";
+    setTargetId((current) => (players.some((player) => player.id === current) ? current : nextDefault));
+  }, [players]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-4 py-10 sm:px-6 lg:px-8">

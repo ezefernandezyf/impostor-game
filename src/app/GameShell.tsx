@@ -6,7 +6,7 @@ import { ResultScreen } from "../features/result/ResultScreen";
 import { SetupScreen } from "../features/setup/SetupScreen";
 import { VotingScreen } from "../features/voting/VotingScreen";
 import { gameReducer } from "../domain/game/reducer";
-import { resolveWinner } from "../domain/game/rules";
+import { applyVote, getAlivePlayers } from "../domain/game/rules";
 import { createEmptyGameSession } from "../domain/game/session";
 import type { GameResult, GameSession } from "../domain/game/types";
 import { loadGameState, saveGameState } from "../lib/storage/gameState";
@@ -45,8 +45,9 @@ export function GameShell(): ReactElement {
   }
 
   function submitVote(targetId: string): void {
-    setResult(resolveWinner(session, targetId));
-    dispatch({ type: "finish-game" });
+    const { nextSession, result: resolvedResult } = applyVote(session, targetId);
+    setResult(resolvedResult);
+    dispatch({ type: "replace-session", session: nextSession });
   }
 
   function returnToSetup(): void {
@@ -60,9 +61,18 @@ export function GameShell(): ReactElement {
 
   if (session.phase === "reveal") {
     const activePlayer = session.players[session.activePlayerIndex];
-    const roleText = activePlayer && session.impostorIds.includes(activePlayer.id) ? "You are the impostor" : `Secret word: ${session.secretWord}`;
+    const isImpostor = activePlayer ? session.impostorIds.includes(activePlayer.id) : false;
+    const revealText = isImpostor ? "Impostor" : session.secretWord;
 
-    return <RevealScreen playerName={activePlayer?.name ?? "the next player"} roleText={roleText} onConfirm={moveToNextPhase} />;
+    return (
+      <RevealScreen
+        key={activePlayer?.id ?? session.id}
+        playerName={activePlayer?.name ?? "the next player"}
+        revealText={revealText}
+        revealTone={isImpostor ? "impostor" : "default"}
+        onConfirm={moveToNextPhase}
+      />
+    );
   }
 
   if (session.phase === "clue-round") {
@@ -70,7 +80,7 @@ export function GameShell(): ReactElement {
   }
 
   if (session.phase === "voting") {
-    return <VotingScreen players={session.players} onSubmitVote={submitVote} />;
+    return <VotingScreen players={getAlivePlayers(session)} onSubmitVote={submitVote} />;
   }
 
   return (
