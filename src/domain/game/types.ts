@@ -24,6 +24,7 @@ export interface GameSession {
   phase: GamePhase;
   players: Player[];
   impostorIds: string[];
+  eliminatedPlayerIds: string[];
   secretWord: string;
   settings: GameSettings;
   activePlayerIndex: number;

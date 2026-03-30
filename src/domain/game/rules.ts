@@ -28,14 +28,71 @@ export function assignImpostors(players: Player[], impostorCount: number): strin
 
   return shufflePlayers(players)
     .slice(0, impostorCount)
-    .map((player) => player.id);
+    .map((player): string => player.id);
 }
 
-export function resolveWinner(session: GameSession, votedPlayerId: string): GameResult {
-  const winners = session.impostorIds.includes(votedPlayerId) ? "players" : "impostors";
+export function getAlivePlayers(session: GameSession): Player[] {
+  const eliminated = new Set(session.eliminatedPlayerIds);
+  return session.players.filter((player): boolean => !eliminated.has(player.id));
+}
+
+function resolveWinnersByAliveCounts(impostorsAlive: number, nonImpostorsAlive: number): GameResult["winners"] | null {
+  if (impostorsAlive === 0) {
+    return "players";
+  }
+
+  if (nonImpostorsAlive === 0) {
+    return "impostors";
+  }
+
+  return impostorsAlive === nonImpostorsAlive ? "impostors" : null;
+}
+
+export interface VoteResolution {
+  nextSession: GameSession;
+  result: GameResult | null;
+}
+
+export function applyVote(session: GameSession, votedPlayerId: string): VoteResolution {
+  if (!session.players.some((player): boolean => player.id === votedPlayerId)) {
+    throw new Error("Voted player does not exist");
+  }
+
+  if (session.eliminatedPlayerIds.includes(votedPlayerId)) {
+    throw new Error("Voted player is already eliminated");
+  }
+
+  const nextEliminatedPlayerIds = [...session.eliminatedPlayerIds, votedPlayerId];
+  const nextSessionBase: GameSession = {
+    ...session,
+    eliminatedPlayerIds: nextEliminatedPlayerIds,
+    activePlayerIndex: 0,
+  };
+
+  const alivePlayers = getAlivePlayers(nextSessionBase);
+  const aliveImpostors = alivePlayers.filter((player): boolean => nextSessionBase.impostorIds.includes(player.id)).length;
+  const aliveNonImpostors = alivePlayers.length - aliveImpostors;
+
+  const winners = resolveWinnersByAliveCounts(aliveImpostors, aliveNonImpostors);
+
+  if (!winners) {
+    return {
+      nextSession: {
+        ...nextSessionBase,
+        phase: "clue-round",
+      },
+      result: null,
+    };
+  }
 
   return {
-    winners,
-    votedPlayerId,
+    nextSession: {
+      ...nextSessionBase,
+      phase: "result",
+    },
+    result: {
+      winners,
+      votedPlayerId,
+    },
   };
 }
