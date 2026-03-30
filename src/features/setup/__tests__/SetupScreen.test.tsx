@@ -79,4 +79,36 @@ describe("SetupScreen", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(/impostor count/i);
     expect(onStartGame).not.toHaveBeenCalled();
   });
+
+  it("renders player name inputs based on the selected player count", async () => {
+    const user = userEvent.setup();
+    const onStartGame = vi.fn();
+
+    render(<SetupScreen onStartGame={onStartGame} />);
+
+    await user.clear(screen.getByLabelText("Player count"));
+    await user.type(screen.getByLabelText("Player count"), "5");
+
+    expect(screen.getByLabelText("Player 5")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Player 6")).not.toBeInTheDocument();
+  });
+
+  it("preloads player names from persisted setup defaults", () => {
+    const onStartGame = vi.fn();
+
+    window.localStorage.setItem(
+      "impostor:setup-defaults",
+      JSON.stringify({
+        playerNames: ["Ana", "Beto", "Caro"],
+        customWordPhrases: ["New York", "Space ship"],
+      })
+    );
+
+    render(<SetupScreen onStartGame={onStartGame} />);
+
+    expect(screen.getByLabelText("Player count")).toHaveValue(3);
+    expect(screen.getByLabelText("Player 1")).toHaveValue("Ana");
+    expect(screen.getByLabelText("Player 2")).toHaveValue("Beto");
+    expect(screen.getByLabelText("Player 3")).toHaveValue("Caro");
+  });
 });

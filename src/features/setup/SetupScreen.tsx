@@ -7,19 +7,41 @@ import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { buildGameSessionFromSetup, getPresetCategories, type SetupFormValues } from "../../domain/game/session";
 import type { GameSession, WordListCategory } from "../../domain/game/types";
+import { localStorageAdapter } from "../../lib/storage/localStorageAdapter";
+import { loadSetupDefaults, saveSetupDefaults } from "../../lib/storage/setupDefaults";
 
 export interface SetupScreenProps {
   onStartGame: (session: GameSession) => void;
   categories?: ReadonlyArray<WordListCategory>;
 }
 
+function clampPlayerCount(playerCount: number): number {
+  if (!Number.isFinite(playerCount)) {
+    return 2;
+  }
+
+  return Math.min(20, Math.max(2, Math.floor(playerCount)));
+}
+
+function parseCustomWordPhrases(customWords: string): string[] {
+  return customWords
+    .split(/\r?\n/)
+    .map((phrase) => phrase.trim())
+    .filter((phrase) => phrase.length > 0);
+}
+
 function createDefaultValues(categories: ReadonlyArray<WordListCategory>): SetupFormValues {
+  const persistedDefaults = loadSetupDefaults(localStorageAdapter);
+  const persistedPlayerNames = persistedDefaults?.playerNames ?? [];
+  const initialPlayerCount = clampPlayerCount(persistedPlayerNames.length >= 2 ? persistedPlayerNames.length : 2);
+
   return {
-    playerCount: 2,
-    playerNames: Array.from({ length: 20 }, (_, index) => `Player ${index + 1}`),
+    playerCount: initialPlayerCount,
+    playerNames: Array.from({ length: 20 }, (_, index) => persistedPlayerNames[index] ?? `Player ${index + 1}`),
     impostorCount: 1,
     selectedSourceId: categories[0]?.id ?? "custom",
-    customWords: "New York\nSpace ship",
+    customWords:
+      persistedDefaults?.customWordPhrases.length ? persistedDefaults.customWordPhrases.join("\n") : "New York\nSpace ship",
     clueTimerSeconds: null,
   };
 }
@@ -31,12 +53,19 @@ export function SetupScreen({ onStartGame, categories = getPresetCategories() }:
 
   const selectedSourceId = watch("selectedSourceId");
   const customWords = watch("customWords");
+  const playerCount = clampPlayerCount(watch("playerCount"));
   const selectedPreset = categories.find((category) => category.id === selectedSourceId) ?? categories[0] ?? null;
   const sourceWords = selectedSourceId === "custom" ? customWords : selectedPreset?.words.join("\n") ?? "";
 
   function handleFormSubmit(values: SetupFormValues): void {
     try {
       const session = buildGameSessionFromSetup(values);
+
+      saveSetupDefaults(localStorageAdapter, {
+        playerNames: values.playerNames.slice(0, values.playerCount).map((name) => name.trim()),
+        customWordPhrases: parseCustomWordPhrases(values.customWords),
+      });
+
       setError(null);
       onStartGame(session);
     } catch (submissionError) {
@@ -80,7 +109,7 @@ export function SetupScreen({ onStartGame, categories = getPresetCategories() }:
                 <Input
                   aria-label="Impostor count"
                   min={1}
-                  max={19}
+                  max={Math.max(1, playerCount - 1)}
                   type="number"
                   {...register("impostorCount", { valueAsNumber: true })}
                 />
@@ -126,7 +155,7 @@ export function SetupScreen({ onStartGame, categories = getPresetCategories() }:
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 20 }, (_, index) => (
+              {Array.from({ length: playerCount }, (_, index) => (
                 <label key={`player-${index + 1}`} className="space-y-2 text-sm text-slate-200">
                   <span>Player {index + 1}</span>
                   <Input
