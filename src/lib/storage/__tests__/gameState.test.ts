@@ -91,6 +91,7 @@ describe("game state storage", () => {
         { id: "p-2", name: "Bob" },
       ],
       impostorIds: ["p-2"],
+      eliminatedPlayerIds: [],
       secretWord: "Library",
       settings: {
         playerCount: 2,

@@ -12,6 +12,7 @@ function createSession(): GameSession {
       { id: "p-3", name: "Chloe" },
     ],
     impostorIds: ["p-2"],
+    eliminatedPlayerIds: [],
     secretWord: "Library",
     settings: {
       playerCount: 3,

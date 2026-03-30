@@ -27,18 +27,25 @@ describe("game flow", () => {
     await user.type(screen.getByLabelText("Player 2"), "Bob");
     await user.click(screen.getByRole("button", { name: "Start game" }));
 
-    expect(screen.getByText(/pass the phone to alice/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Alice" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "I saw my role" }));
-    expect(screen.getByText(/pass the phone to bob/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /ver rol/i }));
+    const aliceIsImpostor = screen.queryByText(/^impostor$/i) !== null;
+    await user.click(screen.getByRole("button", { name: /ya vi mi rol/i }));
 
-    await user.click(screen.getByRole("button", { name: "I saw my role" }));
+    expect(screen.getByRole("heading", { name: "Bob" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /ver rol/i }));
+    const bobIsImpostor = screen.queryByText(/^impostor$/i) !== null;
+    await user.click(screen.getByRole("button", { name: /ya vi mi rol/i }));
+
     expect(screen.getByRole("heading", { name: /clue round/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /continue to voting/i }));
     expect(screen.getByRole("heading", { name: /voting/i })).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText(/vote target/i), "player-1");
+    const voteTarget = aliceIsImpostor ? "player-1" : bobIsImpostor ? "player-2" : "player-1";
+    await user.selectOptions(screen.getByLabelText(/vote target/i), voteTarget);
     await user.click(screen.getByRole("button", { name: /submit vote/i }));
 
     expect(screen.getByRole("heading", { name: /result/i })).toBeInTheDocument();
@@ -63,8 +70,10 @@ describe("game flow", () => {
     await user.type(screen.getByLabelText("Player 2"), "Bob");
     await user.click(screen.getByRole("button", { name: "Start game" }));
 
-    await user.click(screen.getByRole("button", { name: "I saw my role" }));
-    await user.click(screen.getByRole("button", { name: "I saw my role" }));
+    await user.click(screen.getByRole("button", { name: /ver rol/i }));
+    await user.click(screen.getByRole("button", { name: /ya vi mi rol/i }));
+    await user.click(screen.getByRole("button", { name: /ver rol/i }));
+    await user.click(screen.getByRole("button", { name: /ya vi mi rol/i }));
 
     expect(screen.getByText(/timer: 45 seconds/i)).toBeInTheDocument();
   });

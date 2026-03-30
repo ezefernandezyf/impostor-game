@@ -27,6 +27,14 @@
 - **Interfaces de Dominio**: Se deben definir interfaces explícitas para cada entidad de datos. El uso de `Partial<T>` solo se permite para estados locales de formularios.
 - **TDD (Test-Driven Development)**: Se debe escribir el test antes que el código funcional. El objetivo es un **100% de cobertura** de los escenarios definidos.
 
+### 4.1 Reglas para `.gga` (No Alucinar)
+
+- **Evidencia literal**: Solo reportar violaciones si están presentes de forma literal en los archivos revisados (ej: `any`). No inferir ni “asumir” errores.
+- **React 19 (API real)**: No inventar cambios de API de React. Hooks estándar (`useState`, `useEffect`, etc.) son válidos.
+- **Alcance de retornos explícitos**: La exigencia de tipo de retorno explícito aplica a **componentes React** (archivos `*.tsx`). No bloquear por utilidades/funciones de dominio ni por callbacks (`map/filter/find`).
+- **Fuera de alcance**: No bloquear commits por “falta de evidencia” sobre Engram, nombres de branches, specs (`docs/specs/`) o TDD/tests si esos artefactos no forman parte del conjunto revisado por `.gga`.
+- **Escape hatch (solo si es necesario)**: Si `.gga` falla por limitaciones técnicas o falsos positivos (ej: truncado de contexto, limitaciones de Windows/curl), se permite commitear con `git commit --no-verify` **únicamente** si `npm test` y `npm run lint` pasaron, y el commit incluye una nota breve explicando el motivo.
+
 ## 5. Protocolo de Memoria Persistente (Engram)
 
 - **Registro de Decisiones**: Es obligatorio persistir cada cambio de arquitectura, solución de bugs críticos y la introducción de nuevas librerías en el servidor MCP de **Engram**.

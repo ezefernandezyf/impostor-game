@@ -17,7 +17,7 @@ function createSessionId(): string {
 }
 
 function buildPlayers(playerCount: number, playerNames: string[]): Player[] {
-  return playerNames.slice(0, playerCount).map((name, index) => ({
+  return playerNames.slice(0, playerCount).map((name, index): Player => ({
     id: `player-${index + 1}`,
     name,
   }));
@@ -27,11 +27,11 @@ function resolveWordPool(selectedSourceId: string, customWords: string): string[
   if (selectedSourceId === "custom") {
     return customWords
       .split(/\r?\n/)
-      .map((word) => word.trim())
-      .filter((word) => word.length > 0);
+      .map((word): string => word.trim())
+      .filter((word): boolean => word.length > 0);
   }
 
-  const presetCategory = presetCategories.find((category) => category.id === selectedSourceId);
+  const presetCategory = presetCategories.find((category): boolean => category.id === selectedSourceId);
   return presetCategory?.words ?? [];
 }
 
@@ -44,6 +44,7 @@ export function createEmptyGameSession(): GameSession {
       { id: "player-2", name: "Player 2" },
     ],
     impostorIds: ["player-2"],
+    eliminatedPlayerIds: [],
     secretWord: presetCategories[0]?.words[0] ?? "Library",
     settings: {
       playerCount: 2,
@@ -79,6 +80,7 @@ export function buildGameSessionFromSetup(values: SetupFormValues): GameSession 
     phase: "setup",
     players,
     impostorIds,
+    eliminatedPlayerIds: [],
     secretWord,
     settings: {
       playerCount: values.playerCount,

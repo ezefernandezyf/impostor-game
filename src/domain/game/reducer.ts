@@ -3,6 +3,7 @@ import { createEmptyGameSession } from "./session";
 
 export type GameAction =
   | { type: "start-game"; session: GameSession }
+  | { type: "replace-session"; session: GameSession }
   | { type: "start-reveal" }
   | { type: "advance-player" }
   | { type: "start-clue-round" }
@@ -18,6 +19,8 @@ export function gameReducer(state: GameSession, action: GameAction): GameSession
         phase: "reveal",
         activePlayerIndex: 0,
       };
+    case "replace-session":
+      return action.session;
     case "start-reveal":
       return { ...state, phase: "reveal", activePlayerIndex: 0 };
     case "advance-player":
